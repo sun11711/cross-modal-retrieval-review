@@ -1,0 +1,29 @@
+name: Sync LLM2CLIP
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # 每周日自动同步一次
+  workflow_dispatch:       # 也可以手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 删除旧代码
+        run: rm -rf Code-repository/VLP/LLM2CLIP
+
+      - name: 拉取最新代码
+        run: |
+          git clone https://github.com/microsoft/LLM2CLIP.git Code-repository/VLP/LLM2CLIP
+          rm -rf Code-repository/VLP/LLM2CLIP/.git
+
+      - name: 提交更新
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git diff --staged --quiet || git commit -m "sync: 自动同步 LLM2CLIP 最新代码"
+          git push
